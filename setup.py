@@ -18,6 +18,8 @@ setup(
     author_email="<tommy.cecca@gmail.com>",
     description=DESCRIPTION,
     long_description_content_type="text/markdown",
+    url='https://github.com/t-ceccarini/deep-b-spline-approximation',
+    download_url='https://github.com/t-ceccarini/deep-b-spline-approximation/archive/refs/tags/v_0.1.2.tar.gz',
     install_requires=['torch','numpy','scipy','matplotlib'],
     keywords=['python', 'deep learning', 'mlp', 'cnn', 'cagd', 'bspline', 'bezier'],
     classifiers=[
