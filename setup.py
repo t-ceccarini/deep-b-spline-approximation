@@ -6,7 +6,7 @@ Created on Thu Jan 13 23:29:22 2022
 """
 from setuptools import setup
 
-VERSION = '0.1.1'
+VERSION = '0.1.2'
 DESCRIPTION = 'A python package for bspline curve approximation using deep learning'
 
 # Setting up
