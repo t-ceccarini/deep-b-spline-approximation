@@ -1,5 +1,5 @@
 # deep-b-spline-approximation
-A python package for bspline curve approximation using deep learning. Currently under construction.
+A python package for bspline curve approximation using deep learning. Currently under construction!
 
 ## Installing
 
