@@ -5,22 +5,23 @@ Created on Wed Jan  5 16:45:12 2022
 @author: Tommaso
 """
 import torch
-from deep_b_spline_approximation.preprocessing import computeSegmentation,computeSampling,computeSegmentsNormalization,computeSegmentsParametrization,computeRefinement2,computeTrainingSetComplexity
-from deep_b_spline_approximation.loadfromtxt import loadFlatDataset
+from deep_b_spline_approximation.preprocessing import computeSegmentation,computeSampling,computeSegmentsNormalization,computeSegmentsParametrization,computeRefinement2
 from deep_b_spline_approximation.ppn import PointParametrizationNetwork,PointParametrizationNetworkCNN2
 from deep_b_spline_approximation.kpn import KnotPlacementNetwork
 
 class BSplineApproximator:
     
-    def __init__(self, ppn_type="mlp", device='cuda'):
+    def __init__(self, ppn_type="mlp", device='cpu'):
         
         if(device == 'cuda'):
-            self.device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
+            if(torch.cuda.is_available()):
+                self.device = torch.device('cuda')
+            else:
+                raise Exception("GPU not available.")
         elif(device == 'cpu'):
             self.device = 'cpu'
         
         self.path_load_kpn = r"models\kpn_mlp4.pt"
-        self.path_training_set = r"parnet_datasets\train.txt"
         
         self.p = 2
         
@@ -45,24 +46,10 @@ class BSplineApproximator:
         self.kpn.load_state_dict(checkpoint2['model_state_dict'])
         self.kpn = self.kpn.eval()
         
-        #self.computeThresholdPerc()
-        
         #We use the 98-percentile of the Parnet training set distribution of complexity for the segmentation of the sequences
         self.thresholdPerc = torch.tensor(11.5373).to(self.device)
         
-          
-    def computeThresholdPerc(self):
         
-        n_training_examples = 240000
-        flatdataset,dataset = loadFlatDataset(self.path_training_set,self.p)
-        train1 = flatdataset.reshape(self.p*n_training_examples,100)
-        train2 = train1.reshape(n_training_examples,2,100)
-        train3 = torch.tensor(train2)
-        self.trainingset = train3.permute(0,2,1)
-        
-        self.thresholdPerc = computeTrainingSetComplexity(self.trainingset)
-        
-    
     def approximate(self, points, n_knots, k=3):
         
         self.thresholdPerc,segments,itosplit = computeSegmentation(points,self.thresholdPerc)
