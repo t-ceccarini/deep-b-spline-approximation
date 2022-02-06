@@ -5,6 +5,7 @@ Created on Wed Jan  5 16:45:12 2022
 @author: Tommaso
 """
 import torch
+import requests
 from deep_b_spline_approximation.preprocessing import computeSegmentation,computeSampling,computeSegmentsNormalization,computeSegmentsParametrization,computeRefinement2
 from deep_b_spline_approximation.ppn import PointParametrizationNetwork,PointParametrizationNetworkCNN2
 from deep_b_spline_approximation.kpn import KnotPlacementNetwork
@@ -21,13 +22,23 @@ class BSplineApproximator:
         elif(device == 'cpu'):
             self.device = 'cpu'
         
-        self.path_load_kpn = r"models\kpn_mlp4.pt"
+        #download KPN-MLP model
+        kpn_url = 'https://github.com/t-ceccarini/deep-b-spline-approximation/blob/master/models/kpn_mlp4.pt'
+        r = requests.get(kpn_url, allow_redirects=True)
+        open('kpn_mlp4.pt','wb').write(r.content)
+        
+        self.path_load_kpn = r"kpn_mlp4.pt"
         
         self.p = 2
         
         #Load point parametrization network
         if(ppn_type == "mlp"):
-            self.path_load_ppn = r"models\ppn_mlp1.pt"
+            #download PPN-MLP model
+            ppn_url = 'https://github.com/t-ceccarini/deep-b-spline-approximation/blob/master/models/ppn_mlp1.pt'
+            r = requests.get(ppn_url, allow_redirects=True)
+            open('ppn_mlp1.pt','wb').write(r.content)
+            
+            self.path_load_ppn = r"ppn_mlp1.pt"
             dim, hiddenSize = 200, 1000
             self.ppn = PointParametrizationNetwork(dim,hiddenSize,self.p,device=self.device)
         elif(ppn_type == "cnn"):
