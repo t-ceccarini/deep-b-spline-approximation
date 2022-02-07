@@ -23,7 +23,7 @@ class BSplineApproximator:
             self.device = 'cpu'
         
         #download KPN-MLP model
-        kpn_url = 'https://github.com/t-ceccarini/deep-b-spline-approximation/blob/master/models/kpn_mlp4.pt'
+        kpn_url = 'https://github.com/t-ceccarini/deep-b-spline-approximation/blob/master/models/kpn_mlp4.pt?raw=true'
         r = requests.get(kpn_url, allow_redirects=True)
         open('kpn_mlp4.pt','wb').write(r.content)
         
@@ -34,7 +34,7 @@ class BSplineApproximator:
         #Load point parametrization network
         if(ppn_type == "mlp"):
             #download PPN-MLP model
-            ppn_url = 'https://github.com/t-ceccarini/deep-b-spline-approximation/blob/master/models/ppn_mlp1.pt'
+            ppn_url = 'https://github.com/t-ceccarini/deep-b-spline-approximation/blob/master/models/ppn_mlp1.pt?raw=true'
             r = requests.get(ppn_url, allow_redirects=True)
             open('ppn_mlp1.pt','wb').write(r.content)
             
