@@ -4,11 +4,6 @@ A python package for bspline curve approximation using deep learning. Currently 
 ## Installing
 
 To download deep-b-spline-approximation, either fork this github repo or use Pypi via pip
-```
-pip install deep-b-spline-approximation
-```
-
-## Downloading the models
-```
-pithon -m deep_b_spline_approximation download-models
+```sh
+$ pip install deep-b-spline-approximation
 ```
