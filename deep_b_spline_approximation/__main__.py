@@ -18,10 +18,14 @@ def download_file(model_url, dest):
 
 def download_models():
     print("Downloading models")
+    
     download_file('https://github.com/t-ceccarini/deep-b-spline-approximation/blob/master/models/ppn_mlp1.pt?raw=true',
                   'ppn_mlp1.pt')
     download_file('https://github.com/t-ceccarini/deep-b-spline-approximation/blob/master/models/kpn_mlp4.pt?raw=true',
                   'kpn_mlp4.pt')
+    
+    download_file('https://github.com/t-ceccarini/deep-b-spline-approximation/blob/master/models/ppn_cnn1.pt?raw=true',
+                  'ppn_cnn1.pt')
     
     print("Downloaded models")
     
