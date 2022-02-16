@@ -32,10 +32,10 @@ def download_models():
 
 def main():
     
-    if sys.argv[1] == 'downloads-models':
+    if sys.argv[1] == 'download-models':
         download_models()
         
         return
 
-if __name__ == "main":
+if __name__ == "__main__":
     main()
