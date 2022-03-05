@@ -5,7 +5,7 @@ Created on Wed Jan  5 16:45:12 2022
 @author: Tommaso
 """
 import torch
-import requests
+from prettytable import PrettyTable
 from deep_b_spline_approximation.preprocessing import computeSegmentation,computeSampling,computeSegmentsNormalization,computeSegmentsParametrization,computeRefinement2
 from deep_b_spline_approximation.ppn import PointParametrizationNetwork,PointParametrizationNetworkCNN2
 from deep_b_spline_approximation.kpn import KnotPlacementNetwork
@@ -22,21 +22,12 @@ class BSplineApproximator:
         elif(device == 'cpu'):
             self.device = 'cpu'
         
-        #download KPN-MLP model
-        #kpn_url = 'https://github.com/t-ceccarini/deep-b-spline-approximation/blob/master/models/kpn_mlp4.pt?raw=true'
-        #r = requests.get(kpn_url, allow_redirects=True)
-        #open('kpn_mlp4.pt','wb').write(r.content)
-        
         self.path_load_kpn = r"kpn_mlp4.pt"
         
         self.p = 2
         
         #Load point parametrization network
         if(ppn_type == "mlp"):
-            #download PPN-MLP model
-            #ppn_url = 'https://github.com/t-ceccarini/deep-b-spline-approximation/blob/master/models/ppn_mlp1.pt?raw=true'
-            #r = requests.get(ppn_url, allow_redirects=True)
-            #open('ppn_mlp1.pt','wb').write(r.content)
             
             self.path_load_ppn = r"ppn_mlp1.pt"
             dim, hiddenSize = 200, 1000
@@ -71,6 +62,8 @@ class BSplineApproximator:
         list_of_knots = torch.zeros(points.shape[0],2*(k+1)+n_knots).to(self.device)
         HD_log = torch.zeros(points.shape[0],n_knots+1).to(self.device)
         MSE_log = torch.zeros(points.shape[0],n_knots+1).to(self.device)
+        
+        t = PrettyTable(['Sequence of points','Degree of spline function','Hausdorff distance','Mean Squared Error'])
         
         for i,seq_of_points in enumerate(points,0):
             
@@ -116,6 +109,8 @@ class BSplineApproximator:
             
             torch.cuda.empty_cache()
             
-            print("sequence of points {}, Hausdorff distance: {:0.4f}, Mean Squared Error {:0.4f}".format(i,hd[-1],mse[-1]))
+            #print("sequence of points {}, Hausdorff distance: {:0.4f}, Mean Squared Error {:0.4f}".format(i,hd[-1],mse[-1]))
+            t.add_row([i,k,hd[-1],mse[-1]])
+            print(t)
             
         return splines,list_of_knots,HD_log,MSE_log
