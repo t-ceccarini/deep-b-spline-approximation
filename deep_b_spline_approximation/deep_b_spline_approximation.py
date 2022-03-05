@@ -63,7 +63,13 @@ class BSplineApproximator:
         HD_log = torch.zeros(points.shape[0],n_knots+1).to(self.device)
         MSE_log = torch.zeros(points.shape[0],n_knots+1).to(self.device)
         
-        t = PrettyTable(['Sequence of points','Degree of spline function','Hausdorff distance','Mean Squared Error'])
+        t = PrettyTable(['Sequence of points n.','Degree of the spline function','Hausdorff distance','Mean Squared Error'])
+        t.align['Sequence of points n.'] = 'l'
+        t.align['Degree of the spline function'] = 'l'
+        t.align['Hausdorff distance'] = 'l'
+        t.align['Mean Squared Error'] = 'r'
+        t.hrules = 1
+        print(t)
         
         for i,seq_of_points in enumerate(points,0):
             
@@ -109,8 +115,7 @@ class BSplineApproximator:
             
             torch.cuda.empty_cache()
             
-            #print("sequence of points {}, Hausdorff distance: {:0.4f}, Mean Squared Error {:0.4f}".format(i,hd[-1],mse[-1]))
-            t.add_row([i,k,hd[-1],mse[-1]])
-            print(t)
+            t.add_row([i,k,round(hd[-1],3),round(mse[-1],3)])
+            print ("\n".join(t.get_string().splitlines()[-2:]))
             
         return splines,list_of_knots,HD_log,MSE_log
