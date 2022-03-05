@@ -115,7 +115,7 @@ class BSplineApproximator:
             
             torch.cuda.empty_cache()
             
-            t.add_row([i,k,round(hd[-1],3),round(mse[-1],3)])
+            t.add_row([i,k,round(hd[-1].item(),3),round(mse[-1].item(),3)])
             print ("\n".join(t.get_string().splitlines()[-2:]))
             
         return splines,list_of_knots,HD_log,MSE_log
