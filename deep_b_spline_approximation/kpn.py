@@ -7,7 +7,7 @@ Created on Sat Aug  8 15:02:40 2020
 
 import torch
 from torch import nn
-from deep_b_spline_approximation.BSpline import NDPWithBatch3,computeControlPointsWithBatch2
+from .BSpline import NDPWithBatch3,computeControlPointsWithBatch2
 
 torch.set_default_dtype(torch.float64)
 

@@ -8,7 +8,7 @@ import torch
 import numpy as np
 from scipy.interpolate import make_lsq_spline
 from scipy.spatial.distance import directed_hausdorff
-from deep_b_spline_approximation.BSpline import NDPWithBatch2,computeControlPointsWithBatch2
+from .BSpline import NDPWithBatch2,computeControlPointsWithBatch2
 
 torch.set_default_dtype(torch.float64)
 

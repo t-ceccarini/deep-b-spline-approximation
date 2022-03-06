@@ -8,9 +8,9 @@ Created on Mon Feb 22 15:33:01 2021
 import torch
 import numpy as np
 from torch import nn
-from deep_b_spline_approximation.directedHausdorff import computeDirectedHausdorffDistance4
+from .directedHausdorff import computeDirectedHausdorffDistance4
 from bisect import bisect_left
-from deep_b_spline_approximation.BSpline import NDPWithBatch2,computeControlPointsWithBatch2
+from .BSpline import NDPWithBatch2,computeControlPointsWithBatch2
 from torch.utils.data import DataLoader
 import matplotlib.pyplot as plt
 

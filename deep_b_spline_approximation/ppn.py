@@ -8,7 +8,7 @@ import torch
 import torch.nn.functional as F
 from torch import nn
 from torch.utils.data import DataLoader
-from deep_b_spline_approximation.BSpline import NDPWithBatch2,computeControlPointsWithBatch,computeControlPointsWithBatch2
+from .BSpline import NDPWithBatch2,computeControlPointsWithBatch2
 from timeit import default_timer as timer
 
 torch.set_default_dtype(torch.float64)

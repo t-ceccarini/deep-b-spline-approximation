@@ -6,9 +6,9 @@ Created on Wed Jan  5 16:45:12 2022
 """
 import torch
 from prettytable import PrettyTable
-from deep_b_spline_approximation.preprocessing import computeSegmentation,computeSampling,computeSegmentsNormalization,computeSegmentsParametrization,computeRefinement2
-from deep_b_spline_approximation.ppn import PointParametrizationNetwork,PointParametrizationNetworkCNN2
-from deep_b_spline_approximation.kpn import KnotPlacementNetwork
+from .preprocessing import computeSegmentation,computeSampling,computeSegmentsNormalization,computeSegmentsParametrization,computeRefinement2
+from .ppn import PointParametrizationNetwork,PointParametrizationNetworkCNN2
+from .kpn import KnotPlacementNetwork
 
 class BSplineApproximator:
     
