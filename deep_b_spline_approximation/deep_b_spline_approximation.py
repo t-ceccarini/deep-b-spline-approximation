@@ -6,6 +6,7 @@ Created on Wed Jan  5 16:45:12 2022
 """
 import torch
 from prettytable import PrettyTable
+import os
 from .preprocessing import computeSegmentation,computeSampling,computeSegmentsNormalization,computeSegmentsParametrization,computeRefinement2
 from .ppn import PointParametrizationNetwork,PointParametrizationNetworkCNN2
 from .kpn import KnotPlacementNetwork
@@ -22,18 +23,19 @@ class BSplineApproximator:
         elif(device == 'cpu'):
             self.device = 'cpu'
         
-        self.path_load_kpn = r"kpn_mlp4.pt"
+        output_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)),'data')
+        
+        self.path_load_kpn = os.path.join(output_dir,'kpn_mlp4.pt')
         
         self.p = 2
         
         #Load point parametrization network
         if(ppn_type == "mlp"):
-            
-            self.path_load_ppn = r"ppn_mlp1.pt"
+            self.path_load_ppn = os.path.join(output_dir,'ppn_mlp1.pt')
             dim, hiddenSize = 200, 1000
             self.ppn = PointParametrizationNetwork(dim,hiddenSize,self.p,device=self.device)
         elif(ppn_type == "cnn"):
-            self.path_load_ppn = r"models\ppn_cnn1.pt"
+            self.path_load_ppn = os.path.join(output_dir,'ppn_cnn1.pt')
             self.ppn = PointParametrizationNetworkCNN2(device=self.device)
             
         checkpoint1 = torch.load(self.path_load_ppn)

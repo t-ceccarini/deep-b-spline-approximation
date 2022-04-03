@@ -6,6 +6,7 @@ Created on Wed Feb 16 21:38:15 2022
 """
 import sys
 import requests
+import os
 
 def download_file(model_url, dest):
     
@@ -16,16 +17,16 @@ def download_file(model_url, dest):
     
     print(f"Downloaded {model_url}")
 
-def download_models():
+def download_models(output_dir):
     print("Downloading models")
     
     download_file('https://github.com/t-ceccarini/deep-b-spline-approximation/blob/master/models/ppn_mlp1.pt?raw=true',
-                  'ppn_mlp1.pt')
+                  os.path.join(output_dir,'ppn_mlp1.pt'))
     download_file('https://github.com/t-ceccarini/deep-b-spline-approximation/blob/master/models/kpn_mlp4.pt?raw=true',
-                  'kpn_mlp4.pt')
+                  os.path.join(output_dir,'kpn_mlp4.pt'))
     
     download_file('https://github.com/t-ceccarini/deep-b-spline-approximation/blob/master/models/ppn_cnn1.pt?raw=true',
-                  'ppn_cnn1.pt')
+                  os.path.join(output_dir,'ppn_cnn1.pt'))
     
     print("Downloaded models")
     
@@ -33,7 +34,8 @@ def download_models():
 def main():
     
     if sys.argv[1] == 'download-models':
-        download_models()
+        output_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)),'data')
+        download_models(output_dir)
         
         return
 
