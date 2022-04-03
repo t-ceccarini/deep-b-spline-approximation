@@ -23,7 +23,7 @@ class BSplineApproximator:
         elif(device == 'cpu'):
             self.device = 'cpu'
         
-        output_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)),'data')
+        output_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)),'models')
         
         self.path_load_kpn = os.path.join(output_dir,'kpn_mlp4.pt')
         

@@ -34,7 +34,8 @@ def download_models(output_dir):
 def main():
     
     if sys.argv[1] == 'download-models':
-        output_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)),'data')
+        os.makedirs(os.path.join(os.path.dirname(os.path.realpath(__file__)),'models'))
+        output_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)),'models')
         download_models(output_dir)
         
         return
