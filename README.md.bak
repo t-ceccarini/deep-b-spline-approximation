@@ -10,5 +10,5 @@ pip install deep-b-spline-approximation
 
 ## Downloading the models
 ```
-python -m deep_b_spline_approximation download-models
+pithon -m deep_b_spline_approximation download-models
 ```
