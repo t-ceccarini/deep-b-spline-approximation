@@ -5,15 +5,15 @@ Created on Wed Feb 16 21:38:15 2022
 @author: Tommaso
 """
 import sys
-import requests
+import urllib.request
 import os
 
 def download_file(model_url, dest):
     
     print(f"Downloading {model_url}")
     
-    r = requests.get(model_url, allow_redirects=True)
-    open(dest,'wb').write(r.content)
+    sys.stdout.flush()
+    urllib.request.urlretrieve(model_url,dest)
     
     print(f"Downloaded {model_url}")
 
