@@ -15,11 +15,11 @@ setup(
     packages=['deep_b_spline_approximation'],
     version=VERSION,
     author="Tommaso Ceccarini",
-    author_email="<tommy.cecca@gmail.com>",
+    author_email="<tceccarini93@gmail.com>",
     description=DESCRIPTION,
     long_description_content_type="text/markdown",
     url='https://github.com/t-ceccarini/deep-b-spline-approximation',
-    download_url='https://github.com/t-ceccarini/deep-b-spline-approximation/archive/refs/tags/v_0.2.3.tar.gz',
+    download_url='https://github.com/t-ceccarini/deep-b-spline-approximation/archive/refs/tags/v_0.2.4.tar.gz',
     install_requires=['torch','prettytable','numpy','scipy','matplotlib'],
     keywords=['python', 'deep learning', 'mlp', 'cnn', 'cagd', 'bspline', 'bezier'],
     classifiers=[
