@@ -516,7 +516,7 @@ def computeSegmentsNormalization(curveSeg,curve,ranges,indices,l):
     return curveSegNormalized
     
 
-def reshapeMLP(curve3,nsegs,param):
+def reshapeMLP(curve3,curve4,nsegs,param):
     
     curve3 = curve3.reshape(nsegs,-1,1).squeeze(-1)
     
@@ -531,7 +531,7 @@ def reshapeMLP(curve3,nsegs,param):
         
     return curve3,curve4,paramSegNormalized
 
-def reshapeCNN(curve3,nsegs,param):
+def reshapeCNN(curve3,curve4,nsegs,param):
     
     if nsegs > 1:
         
@@ -544,7 +544,7 @@ def reshapeCNN(curve3,nsegs,param):
     
     return curve3,curve4,paramSegNormalized
 
-def reshapeStd(curve3,nsegs,param):
+def reshapeStd(curve3,curve4,nsegs,param):
     
     if nsegs > 1:
         
@@ -563,13 +563,14 @@ def computeSegmentsParametrization(curve,curveSeg,curveSegNormalized,ranges,indi
     p = curve.shape[1]
     
     curve3 = curveSegNormalized.reshape(nsegs,l,p)
+    curve4 = curve3.clone()
     
     if ppn_type == "mlp":
-        curve3,curve4,paramSegNormalized = reshapeMLP(curve3, nsegs, param)
+        curve3,curve4,paramSegNormalized = reshapeMLP(curve3,curve4,nsegs,param)
     elif ppn_type == "cnn":
-        curve3,curve4,paramSegNormalized = reshapeCNN(curve3, nsegs, param)
+        curve3,curve4,paramSegNormalized = reshapeCNN(curve3,curve4,nsegs,param)
     else:
-        curve3,curve4,paramSegNormalized = reshapeStd(curve3, nsegs, param)
+        curve3,curve4,paramSegNormalized = reshapeStd(curve3,curve4,nsegs,param)
     
     curve3 = curve3.reshape(-1,p)
     paramSegNormalized = paramSegNormalized.reshape(-1)
