@@ -6,7 +6,7 @@ Created on Thu Jan 13 23:29:22 2022
 """
 from setuptools import setup
 
-VERSION = '0.2.5'
+VERSION = '0.2.6'
 DESCRIPTION = 'A python package for bspline curve approximation using deep learning'
 
 # Setting up
@@ -19,7 +19,7 @@ setup(
     description=DESCRIPTION,
     long_description_content_type="text/markdown",
     url='https://github.com/t-ceccarini/deep-b-spline-approximation',
-    download_url='https://github.com/t-ceccarini/deep-b-spline-approximation/archive/refs/tags/v_0.2.5.tar.gz',
+    download_url='https://github.com/t-ceccarini/deep-b-spline-approximation/archive/refs/tags/v_0.2.6.tar.gz',
     install_requires=['torch','prettytable','numpy','scipy','matplotlib'],
     keywords=['python', 'deep learning', 'mlp', 'cnn', 'cagd', 'bspline', 'bezier'],
     classifiers=[
