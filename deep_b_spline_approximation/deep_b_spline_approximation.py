@@ -37,7 +37,8 @@ class BSplineApproximator:
         elif(ppn_type == "cnn"):
             self.path_load_ppn = os.path.join(output_dir,'ppn_cnn1.pt')
             self.ppn = PointParametrizationNetworkCNN2(device=self.device)
-            
+        
+        self.ppn_type = ppn_type
         checkpoint1 = torch.load(self.path_load_ppn)
         self.ppn.load_state_dict(checkpoint1['model_state_dict'])
         self.ppn = self.ppn.eval()
@@ -97,6 +98,7 @@ class BSplineApproximator:
                                                                                                        indices,
                                                                                                        l,
                                                                                                        self.ppn,
+                                                                                                       self.ppn_type,
                                                                                                        self.device)
 
             spline,knots,cps,hd,mse = computeRefinement2(seq_of_points,
