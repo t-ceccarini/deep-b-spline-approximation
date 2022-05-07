@@ -516,36 +516,61 @@ def computeSegmentsNormalization(curveSeg,curve,ranges,indices,l):
     return curveSegNormalized
     
 
-def computeSegmentsParametrization(curve,curveSeg,curveSegNormalized,ranges,indices,l,param,device="cuda"):
+def reshapeMLP(curve3,nsegs,param):
+    
+    curve3 = curve3.reshape(nsegs,-1,1).squeeze(-1)
+    
+    if nsegs > 1:
+        
+        paramSegNormalized = param(curve3)[1]
+    
+    else:
+        
+        curve4 = curve3.repeat(2,1)
+        paramSegNormalized = param(curve4)[1][-1]
+        
+    return curve3,curve4,paramSegNormalized
+
+def reshapeCNN(curve3,nsegs,param):
+    
+    if nsegs > 1:
+        
+        paramSegNormalized = param(curve3)[1]
+             
+    else:
+        
+        curve4 = curve3.repeat(2,1,1)      
+        paramSegNormalized = param(curve4)[1][-1]
+    
+    return curve3,curve4,paramSegNormalized
+
+def reshapeStd(curve3,nsegs,param):
+    
+    if nsegs > 1:
+        
+        paramSegNormalized = param(curve3)
+        
+    else:
+        
+        curve4 = curve3.repeat(2,1,1)      
+        paramSegNormalized = param(curve4)
+    
+    return curve3,curve4,paramSegNormalized
+
+def computeSegmentsParametrization(curve,curveSeg,curveSegNormalized,ranges,indices,l,param,ppn_type,device="cuda"):
     
     nsegs = len(ranges)
     p = curve.shape[1]
     
     curve3 = curveSegNormalized.reshape(nsegs,l,p)
     
-    """Se usi il modello mlp scommenta questa operazione"""
-    curve3 = curve3.reshape(nsegs,-1,1).squeeze(-1)
-    
-    if nsegs > 1:
-        
-        #se usi reti neurali usa questa
-        paramSegNormalized = param(curve3)[1]
-        
-        #paramSegNormalized = param(curve3)
-        
+    if ppn_type == "mlp":
+        curve3,curve4,paramSegNormalized = reshapeMLP(curve3, nsegs, param)
+    elif ppn_type == "cnn":
+        curve3,curve4,paramSegNormalized = reshapeCNN(curve3, nsegs, param)
     else:
-        
-        #curve4 = curve3.repeat(2,1,1)      
-
-        """Usa questo se usi il modello di Laube"""                 
-        curve4 = curve3.repeat(2,1)
-        
-        #se usi reti neurali usa questa
-        paramSegNormalized = param(curve4)[1][-1]
-        
-        #paramSegNormalized = param(curve4)
-        
-        
+        curve3,curve4,paramSegNormalized = reshapeStd(curve3, nsegs, param)
+    
     curve3 = curve3.reshape(-1,p)
     paramSegNormalized = paramSegNormalized.reshape(-1)
     
