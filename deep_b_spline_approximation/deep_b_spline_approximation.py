@@ -60,6 +60,7 @@ class BSplineApproximator:
         self.thresholdPerc,segments,itosplit = computeSegmentation(points,self.thresholdPerc)
 
         points = points.to(self.device)
+        
         l = 100
         
         splines = torch.zeros(points.shape[0],points.shape[1],points.shape[2]).to(self.device)
