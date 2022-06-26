@@ -60,6 +60,7 @@ class BSplineApproximator:
         self.thresholdPerc,segments,itosplit = computeSegmentation(points,self.thresholdPerc)
 
         points = points.to(self.device)
+        l = 100
         
         splines = torch.zeros(points.shape[0],points.shape[1],points.shape[2]).to(self.device)
         list_of_knots = torch.zeros(points.shape[0],2*(k+1)+n_knots).to(self.device)
@@ -77,8 +78,6 @@ class BSplineApproximator:
         for i,seq_of_points in enumerate(points,0):
             
             segs = segments[i]
-
-            l = points.shape[1]
 
             seq_of_points_seg, ranges, indices = computeSampling(seq_of_points,
                                                                  segs,
