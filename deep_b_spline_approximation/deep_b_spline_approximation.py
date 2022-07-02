@@ -58,15 +58,18 @@ class BSplineApproximator:
     def approximate(self, points, n_knots, k=3):
         
         self.thresholdPerc,segments,itosplit = computeSegmentation(points,self.thresholdPerc)
+        n_max_knots = max([len(s) for s in segments])
 
         points = points.to(self.device)
         
         l = 100
         
+        length = n_max_knots if n_max_knots >= n_knots else n_knots
+        
         splines = torch.zeros(points.shape[0],points.shape[1],points.shape[2]).to(self.device)
-        list_of_knots = torch.zeros(points.shape[0],2*(k+1)+n_knots).to(self.device)
-        HD_log = torch.zeros(points.shape[0],n_knots+1).to(self.device)
-        MSE_log = torch.zeros(points.shape[0],n_knots+1).to(self.device)
+        list_of_knots = torch.zeros(points.shape[0],2*(k+1)+length).to(self.device)
+        HD_log = torch.zeros(points.shape[0],length+1).to(self.device)
+        MSE_log = torch.zeros(points.shape[0],length+1).to(self.device)
         
         t = PrettyTable(['Sequence of points n.','Degree of the spline function','Hausdorff distance','Mean Squared Error'])
         t.align['Sequence of points n.'] = 'l'
@@ -108,6 +111,7 @@ class BSplineApproximator:
                                                                    knots,
                                                                    ranges,
                                                                    k,
+                                                                   n_max_knots,
                                                                    n_knots,
                                                                    self.kpn,
                                                                    self.device)

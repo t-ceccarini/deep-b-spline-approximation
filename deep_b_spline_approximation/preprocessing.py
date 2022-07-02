@@ -611,18 +611,13 @@ def computeSegmentsParametrization(curve,curveSeg,curveSegNormalized,ranges,indi
         c,d = value[0], value[1]
         j = indices[(a,b)]
         
-        #se avevi fatto il sotto campionamento allora riaggiungi quello che avevi tolto
+        #If you've done subsampling add the points previously removed
         if b-a+1 > l:
             
             indicesExcluded = set(j)
             indicesIncluded = list(set(range(a,b+1)) - indicesExcluded)
             
             indicesIncluded.sort()
-            
-            #print(f"valore di a: {a}")
-            #print(f"valore di b: {b}")
-            #print(f"indices Excluded: {j}")
-            #print(f"indices Included: {indicesIncluded}")
             
             param[indicesIncluded] = paramSegNormalizedRescaled[c:d+1]
             
@@ -647,10 +642,9 @@ def computeSegmentsParametrization(curve,curveSeg,curveSegNormalized,ranges,indi
             
             #print(key)
         
-        #se avevi fatto il super campionamento togli roba
+        #If you've done supersampling remove points
         elif b-a+1 < l:
             param[a:b+1] = paramSegNormalizedRescaled[j]
-            #print(key)
         
         else:
             param[a:b+1] = paramSegNormalizedRescaled[a:b+1]
@@ -665,11 +659,11 @@ def findClosest(list,number,left):
     try:
         val = list[pos-left]
     except:
-        print(f"lista: {list}")
-        print(f"numero: {number}")
-        print(f"lunghezza della lista: {len(list)}")
-        print(f"valore di pos: {pos}")
-        print(f"valore di left: {left}")
+        print(f"list: {list}")
+        print(f"number: {number}")
+        print(f"list's length': {len(list)}")
+        print(f"pos value: {pos}")
+        print(f"left value: {left}")
     
     return val
 
@@ -687,7 +681,10 @@ def computeChordLengthSegments(curve,interval):
     return chordlen
 
 
-def computeRefinement2(curve,curveSegNormalized,param,paramSegNormalized,knots,ranges,k,nTotalKnots,knotpl=None,device="cuda"):
+def computeRefinement2(curve,curveSegNormalized,param,paramSegNormalized,knots,ranges,k,nMaxKnots,nTotalKnots,knotpl=None,device="cuda"):
+    
+    if nMaxKnots < nTotalKnots:
+        nMaxKnots = nTotalKnots
     
     ninitialKnots = knots.shape[0] - 2
     nKnotsToAdd = nTotalKnots - ninitialKnots
@@ -696,9 +693,9 @@ def computeRefinement2(curve,curveSegNormalized,param,paramSegNormalized,knots,r
     ones = torch.ones(k).to(device)
     knots = torch.cat((zeros,knots,ones))
     
-    #memorizzo gli errori 
-    errors = torch.zeros(nTotalKnots+1)
-    errorsMSE = torch.zeros(nTotalKnots+1)
+    #Memorize the errors 
+    errors = torch.zeros(nMaxKnots+1)
+    errorsMSE = torch.zeros(nMaxKnots+1)
     
     #Nel vettore delle knot inserisco il parametro più vicino a quello calcolato dalla kpn.
     #Ogni volta che inserisco un parametro lo rimuovo da quelli disponibili.
@@ -792,7 +789,7 @@ def computeRefinement2(curve,curveSegNormalized,param,paramSegNormalized,knots,r
         
         indexKnot2 = indexKnot1 + multiplicity[subsegment]
         
-        #Riscala nell'intervallo opportuno
+        #Rescale in the correct interval
         u0,u1 = knots[k+indexKnot1],knots[k+indexKnot2]
         
         knot = u0 + knot*(u1-u0)
