@@ -864,8 +864,11 @@ def computeRefinement2(curve,curveSegNormalized,param,paramSegNormalized,knots,r
         
     errors[nintknots] = dhd.item()
     errorsMSE[nintknots] = mse.item()
+    
+    knots_tmp = torch.zeros(nMaxKnots)
+    knots_tmp[:knots.shape[0]] = knots
         
-    return spline,knots,c,errors,errorsMSE
+    return spline,knots_tmp,c,errors,errorsMSE
 
 
 def checkValue(value,subsegment):
