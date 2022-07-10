@@ -111,7 +111,7 @@ class BSplineApproximator:
                                                                    knots,
                                                                    ranges,
                                                                    k,
-                                                                   n_max_knots,
+                                                                   length,
                                                                    n_knots,
                                                                    self.kpn,
                                                                    self.device)
