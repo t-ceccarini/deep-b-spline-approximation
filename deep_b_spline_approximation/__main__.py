@@ -34,15 +34,15 @@ def download_evalsets(output_dir):
     print("Downloading evalsets")
     
     download_file('https://github.com/t-ceccarini/deep-b-spline-approximation/blob/master/evalsets/evalset1.txt?raw=true',
-                  os.path.join(output_dir,'ppn_mlp1.pt'))
+                  os.path.join(output_dir,'evalset1.txt'))
     download_file('https://github.com/t-ceccarini/deep-b-spline-approximation/blob/master/evalsets/evalset2.txt?raw=true',
-                  os.path.join(output_dir,'kpn_mlp4.pt'))
+                  os.path.join(output_dir,'evalset2.txt'))
     
     download_file('https://github.com/t-ceccarini/deep-b-spline-approximation/blob/master/evalsets/evalset3.txt?raw=true',
-                  os.path.join(output_dir,'ppn_cnn1.pt'))
+                  os.path.join(output_dir,'evalset3.txt'))
     
     download_file('https://github.com/t-ceccarini/deep-b-spline-approximation/blob/master/evalsets/evalset4.txt?raw=true',
-                  os.path.join(output_dir,'ppn_cnn1.pt'))
+                  os.path.join(output_dir,'evalset4.txt'))
     
     print("Downloaded evalsets")
 
