@@ -31,17 +31,20 @@ def download_models(output_dir):
     print("Downloaded models")
     
 def download_evalsets(output_dir):
-    print("Downloading models")
+    print("Downloading evalsets")
     
-    download_file('https://github.com/t-ceccarini/deep-b-spline-approximation/blob/master/models/ppn_mlp1.pt?raw=true',
+    download_file('https://github.com/t-ceccarini/deep-b-spline-approximation/blob/master/evalsets/evalset1.txt?raw=true',
                   os.path.join(output_dir,'ppn_mlp1.pt'))
-    download_file('https://github.com/t-ceccarini/deep-b-spline-approximation/blob/master/models/kpn_mlp4.pt?raw=true',
+    download_file('https://github.com/t-ceccarini/deep-b-spline-approximation/blob/master/evalsets/evalset2.txt?raw=true',
                   os.path.join(output_dir,'kpn_mlp4.pt'))
     
-    download_file('https://github.com/t-ceccarini/deep-b-spline-approximation/blob/master/models/ppn_cnn1.pt?raw=true',
+    download_file('https://github.com/t-ceccarini/deep-b-spline-approximation/blob/master/evalsets/evalset3.txt?raw=true',
                   os.path.join(output_dir,'ppn_cnn1.pt'))
     
-    print("Downloaded models")
+    download_file('https://github.com/t-ceccarini/deep-b-spline-approximation/blob/master/evalsets/evalset4.txt?raw=true',
+                  os.path.join(output_dir,'ppn_cnn1.pt'))
+    
+    print("Downloaded evalsets")
 
 def main():
     
