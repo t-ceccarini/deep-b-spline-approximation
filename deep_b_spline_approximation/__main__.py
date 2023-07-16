@@ -58,7 +58,7 @@ def main():
     elif sys.argv[1] == 'download-evalsets':
         os.makedirs(os.path.join(os.path.dirname(os.path.realpath(__file__)),'evalsets'))
         output_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)),'evalsets')
-        download_models(output_dir)
+        download_evalsets(output_dir)
         
         return
 
