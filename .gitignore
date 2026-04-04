@@ -104,6 +104,10 @@ celerybeat.pid
 # Environments
 .env
 .venv
+.venv311/
+.tmp/
+outputs/
+AGENTS.md
 env/
 venv/
 ENV/

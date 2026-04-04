@@ -13,8 +13,11 @@ from .BSpline import NDPWithBatch2,computeControlPointsWithBatch2
 torch.set_default_dtype(torch.float64)
 
 def computeMeanHausdorffDistance3(dataset,model,k,p):
-    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-    #device = "cpu"
+    try:
+        device = next(model.parameters()).device
+    except StopIteration:
+        device = getattr(model, "device", dataset.device)
+
     dataset = dataset.to(device)
     
     output = ()

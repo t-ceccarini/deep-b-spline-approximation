@@ -9,6 +9,11 @@ import torch.nn.functional as F
 from torch import nn
 from torch.utils.data import DataLoader
 from .BSpline import NDPWithBatch2,computeControlPointsWithBatch2
+from .parametrization import (
+    computeCentripetalParametrization,
+    computeChordLengthParametrization,
+    computeUniformParametrization,
+)
 from timeit import default_timer as timer
 
 torch.set_default_dtype(torch.float64)
@@ -17,18 +22,39 @@ torch.set_default_dtype(torch.float64)
 
 class PointParametrizationNetwork(nn.Module):
     
-    def __init__(self,inputSize,hiddenSize,p,k=3,device="cuda"):
+    def __init__(
+        self,
+        inputSize,
+        hiddenSize,
+        p,
+        k=3,
+        device="cuda",
+        internal_knots=None,
+        normalization="batchnorm",
+        input_channels=None,
+    ):
         super(PointParametrizationNetwork,self).__init__()
         self.inputSize = inputSize
         self.hiddenSize = hiddenSize
         self.p = p
-        self.l = int(self.inputSize/self.p)
+        self.input_channels = self.p if input_channels is None else input_channels
+        self.l = int(self.inputSize/self.input_channels)
         self.outputSize = self.l - 1
         #self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
         self.device = device
           
         self.k = k
-        self.u = torch.cat((torch.tensor([0.0]*(self.k+1)),torch.tensor([1.0]*(self.k+1))))
+        self.normalization = normalization
+        if internal_knots is None:
+            self.u = torch.cat((torch.tensor([0.0]*(self.k+1)),torch.tensor([1.0]*(self.k+1))))
+        else:
+            self.u = torch.cat(
+                (
+                    torch.tensor([0.0]*(self.k+1)),
+                    torch.tensor(internal_knots, dtype=torch.float64),
+                    torch.tensor([1.0]*(self.k+1)),
+                )
+            )
         
         #Fully connected layers
         self.inputLayer = torch.nn.Linear(self.inputSize,self.hiddenSize)
@@ -51,32 +77,43 @@ class PointParametrizationNetwork(nn.Module):
         self.layerNorm2 = torch.nn.LayerNorm(self.hiddenSize)
         self.layerNorm3 = torch.nn.LayerNorm(self.hiddenSize)
         self.layerNormOutput = torch.nn.LayerNorm(self.outputSize)
+
+        if self.normalization not in {"batchnorm", "layernorm", "none"}:
+            raise ValueError(f"Unsupported normalization: {self.normalization}")
+
+    def _normalize(self, x, batch_norm_layer, layer_norm_layer):
+        if self.normalization == "batchnorm":
+            return batch_norm_layer(x)
+        if self.normalization == "layernorm":
+            return layer_norm_layer(x)
+        return x
         
     
     def forward(self,x):
         batchSize = x.shape[0]
         
         curves = torch.zeros((batchSize,self.l,self.p))
-        curves = x.reshape(batchSize,self.p,self.l).permute(0,2,1).to(self.device)
+        features = x.reshape(batchSize,self.input_channels,self.l).permute(0,2,1).to(self.device)
+        curves = features[:,:,:self.p]
         
         x = self.inputLayer(x)
-        x = self.batchNormInput(x)
+        x = self._normalize(x, self.batchNormInput, self.layerNormInput)
         x = self.softplus(x)
         
         x = self.hiddenLayer1(x)
-        x = self.batchNorm1(x)
+        x = self._normalize(x, self.batchNorm1, self.layerNorm1)
         x = self.softplus(x)
         
         x = self.hiddenLayer2(x)
-        x = self.batchNorm2(x)
+        x = self._normalize(x, self.batchNorm2, self.layerNorm2)
         x = self.softplus(x)
         
         x = self.hiddenLayer3(x)
-        x = self.batchNorm3(x)
+        x = self._normalize(x, self.batchNorm3, self.layerNorm3)
         x = self.softplus(x)
         
         x = self.outputLayer(x)
-        x = self.batchNormOutput(x)
+        x = self._normalize(x, self.batchNormOutput, self.layerNormOutput)
         x = self.softplus(x)
         
         """PP1. Accumulation & Rescaling Layer"""
@@ -99,6 +136,184 @@ class PointParametrizationNetwork(nn.Module):
         splines = torch.matmul(A,c)
         
         return splines,x,curves
+
+
+class ConvexMixtureParametrizationNetwork(nn.Module):
+
+    def __init__(
+        self,
+        inputSize,
+        hiddenSize,
+        p,
+        k=3,
+        device="cuda",
+        internal_knots=None,
+        normalization="none",
+    ):
+        super(ConvexMixtureParametrizationNetwork,self).__init__()
+        self.inputSize = inputSize
+        self.hiddenSize = hiddenSize
+        self.p = p
+        self.l = int(self.inputSize/self.p)
+        self.k = k
+        self.device = device
+        self.normalization = normalization
+
+        if internal_knots is None:
+            self.u = torch.cat((torch.tensor([0.0]*(self.k+1)),torch.tensor([1.0]*(self.k+1))))
+        else:
+            self.u = torch.cat(
+                (
+                    torch.tensor([0.0]*(self.k+1)),
+                    torch.tensor(internal_knots, dtype=torch.float64),
+                    torch.tensor([1.0]*(self.k+1)),
+                )
+            )
+
+        self.inputLayer = torch.nn.Linear(self.inputSize,self.hiddenSize)
+        self.hiddenLayer1 = torch.nn.Linear(self.hiddenSize,self.hiddenSize)
+        self.hiddenLayer2 = torch.nn.Linear(self.hiddenSize,self.hiddenSize)
+        self.outputLayer = torch.nn.Linear(self.hiddenSize,3)
+
+        self.softplus = torch.nn.Softplus()
+        self.batchNormInput = torch.nn.BatchNorm1d(self.hiddenSize,momentum=0.1,track_running_stats=False)
+        self.batchNorm1 = torch.nn.BatchNorm1d(self.hiddenSize,momentum=0.1,track_running_stats=False)
+        self.batchNorm2 = torch.nn.BatchNorm1d(self.hiddenSize,momentum=0.1,track_running_stats=False)
+        self.layerNormInput = torch.nn.LayerNorm(self.hiddenSize)
+        self.layerNorm1 = torch.nn.LayerNorm(self.hiddenSize)
+        self.layerNorm2 = torch.nn.LayerNorm(self.hiddenSize)
+
+        if self.normalization not in {"batchnorm", "layernorm", "none"}:
+            raise ValueError(f"Unsupported normalization: {self.normalization}")
+
+    def _normalize(self, x, batch_norm_layer, layer_norm_layer):
+        if self.normalization == "batchnorm":
+            return batch_norm_layer(x)
+        if self.normalization == "layernorm":
+            return layer_norm_layer(x)
+        return x
+
+    def forward(self,x):
+        batchSize = x.shape[0]
+        curves = x.reshape(batchSize,self.p,self.l).permute(0,2,1).to(self.device)
+
+        z = self.inputLayer(x)
+        z = self._normalize(z, self.batchNormInput, self.layerNormInput)
+        z = self.softplus(z)
+
+        z = self.hiddenLayer1(z)
+        z = self._normalize(z, self.batchNorm1, self.layerNorm1)
+        z = self.softplus(z)
+
+        z = self.hiddenLayer2(z)
+        z = self._normalize(z, self.batchNorm2, self.layerNorm2)
+        z = self.softplus(z)
+
+        weights = torch.softmax(self.outputLayer(z), dim=1)
+
+        t_uniform = computeUniformParametrization(curves)
+        t_chord = computeChordLengthParametrization(curves)
+        t_centripetal = computeCentripetalParametrization(curves)
+        candidates = torch.stack((t_uniform, t_chord, t_centripetal), dim=1)
+        t = torch.sum(weights.unsqueeze(-1) * candidates, dim=1)
+        t[:,0] = 0.0
+        t[:,-1] = 1.0
+
+        A = NDPWithBatch2(t,self.k,self.u,self.device)
+        c = computeControlPointsWithBatch2(A,curves)
+        splines = torch.matmul(A,c)
+
+        return splines,t,curves
+
+
+class CentripetalResidualParametrizationNetwork(nn.Module):
+
+    def __init__(
+        self,
+        inputSize,
+        hiddenSize,
+        p,
+        k=3,
+        device="cuda",
+        internal_knots=None,
+        normalization="none",
+        residual_scale=0.25,
+    ):
+        super(CentripetalResidualParametrizationNetwork,self).__init__()
+        self.inputSize = inputSize
+        self.hiddenSize = hiddenSize
+        self.p = p
+        self.l = int(self.inputSize/self.p)
+        self.outputSize = self.l - 1
+        self.k = k
+        self.device = device
+        self.normalization = normalization
+        self.residual_scale = residual_scale
+
+        if internal_knots is None:
+            self.u = torch.cat((torch.tensor([0.0]*(self.k+1)),torch.tensor([1.0]*(self.k+1))))
+        else:
+            self.u = torch.cat(
+                (
+                    torch.tensor([0.0]*(self.k+1)),
+                    torch.tensor(internal_knots, dtype=torch.float64),
+                    torch.tensor([1.0]*(self.k+1)),
+                )
+            )
+
+        self.inputLayer = torch.nn.Linear(self.inputSize,self.hiddenSize)
+        self.hiddenLayer1 = torch.nn.Linear(self.hiddenSize,self.hiddenSize)
+        self.hiddenLayer2 = torch.nn.Linear(self.hiddenSize,self.hiddenSize)
+        self.outputLayer = torch.nn.Linear(self.hiddenSize,self.outputSize)
+
+        self.softplus = torch.nn.Softplus()
+        self.batchNormInput = torch.nn.BatchNorm1d(self.hiddenSize,momentum=0.1,track_running_stats=False)
+        self.batchNorm1 = torch.nn.BatchNorm1d(self.hiddenSize,momentum=0.1,track_running_stats=False)
+        self.batchNorm2 = torch.nn.BatchNorm1d(self.hiddenSize,momentum=0.1,track_running_stats=False)
+        self.layerNormInput = torch.nn.LayerNorm(self.hiddenSize)
+        self.layerNorm1 = torch.nn.LayerNorm(self.hiddenSize)
+        self.layerNorm2 = torch.nn.LayerNorm(self.hiddenSize)
+
+        if self.normalization not in {"batchnorm", "layernorm", "none"}:
+            raise ValueError(f"Unsupported normalization: {self.normalization}")
+
+    def _normalize(self, x, batch_norm_layer, layer_norm_layer):
+        if self.normalization == "batchnorm":
+            return batch_norm_layer(x)
+        if self.normalization == "layernorm":
+            return layer_norm_layer(x)
+        return x
+
+    def forward(self,x):
+        batchSize = x.shape[0]
+        curves = x.reshape(batchSize,self.p,self.l).permute(0,2,1).to(self.device)
+
+        base_t = computeCentripetalParametrization(curves)
+        base_delta = base_t[:,1:] - base_t[:,:-1]
+
+        z = self.inputLayer(x)
+        z = self._normalize(z, self.batchNormInput, self.layerNormInput)
+        z = self.softplus(z)
+
+        z = self.hiddenLayer1(z)
+        z = self._normalize(z, self.batchNorm1, self.layerNorm1)
+        z = self.softplus(z)
+
+        z = self.hiddenLayer2(z)
+        z = self._normalize(z, self.batchNorm2, self.layerNorm2)
+        z = self.softplus(z)
+
+        correction = self.residual_scale * torch.tanh(self.outputLayer(z))
+        delta = base_delta * (1.0 + correction)
+        t = torch.cumsum(delta, dim=1)
+        t = torch.cat((torch.zeros(t.shape[0],1).to(self.device), t), axis=1)
+        t = torch.div(t, torch.max(t,1)[0].view(-1,1))
+
+        A = NDPWithBatch2(t,self.k,self.u,self.device)
+        c = computeControlPointsWithBatch2(A,curves)
+        splines = torch.matmul(A,c)
+
+        return splines,t,curves
 
 """PPN-CNN"""
 
